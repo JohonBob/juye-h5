@@ -192,7 +192,8 @@
   }
   .mask.show{opacity:1;pointer-events:auto;}
   .modal{
-    width:84%;max-width:340px;
+    width:84%;max-width:340px;max-height:82%;
+    display:flex;flex-direction:column;
     background:
       radial-gradient(circle at 12% 8%, rgba(201,160,99,.18), transparent 40%),
       var(--paper);
@@ -219,10 +220,26 @@
     font-size:13px;letter-spacing:3px;padding:6px 12px;border-radius:5px;
     border:1px solid #e8b7a5;box-shadow:0 3px 8px rgba(0,0,0,.35);z-index:2;
   }
-  .modal-face{width:74px;margin:6px auto 4px;display:block;}
-  .modal h3{color:var(--cinnabar-d);font-size:22px;letter-spacing:5px;margin:4px 0 10px;}
-  .modal .body{font-size:13.5px;color:#4a4033;line-height:1.9;text-align:justify;letter-spacing:1px;}
-  .modal .btn{margin-top:16px;font-size:14px;padding:10px 30px;letter-spacing:4px;}
+  .modal-face{width:60px;margin:2px auto 0;display:block;flex:none;}
+  .modal h3{color:var(--cinnabar-d);font-size:22px;letter-spacing:5px;margin:2px 0 8px;flex:none;}
+  /* 弹窗配图 */
+  .popimg{
+    width:100%;height:148px;object-fit:cover;flex:none;
+    border-radius:10px;border:1px solid var(--gold-d);
+    box-shadow:0 3px 10px rgba(0,0,0,.18), inset 0 0 0 3px rgba(246,239,221,.6);
+    margin-bottom:5px;background:#e8dcc0;
+  }
+  .popcap{
+    font-size:10.5px;color:#8b7a5e;letter-spacing:1px;
+    margin-bottom:9px;text-align:center;flex:none;
+  }
+  .modal .body{
+    font-size:13px;color:#4a4033;line-height:1.9;text-align:justify;letter-spacing:1px;
+    overflow-y:auto;flex:1;min-height:0;padding-right:2px;
+  }
+  .modal .body::-webkit-scrollbar{width:3px;}
+  .modal .body::-webkit-scrollbar-thumb{background:rgba(169,127,63,.5);border-radius:3px;}
+  .modal .btn{margin-top:14px;font-size:14px;padding:10px 30px;letter-spacing:4px;flex:none;}
 
   /* ---------- 导航 ---------- */
   .dots{
@@ -483,6 +500,8 @@
       <div class="modal-seal" id="popSeal">麟麟说</div>
       <div class="modal-face" id="popFace"></div>
       <h3 id="popTitle"></h3>
+      <img class="popimg" id="popImg" alt="" style="display:none">
+      <div class="popcap" id="popCap" style="display:none"></div>
       <div class="body" id="popBody"></div>
       <button class="btn" onclick="closePop()">知道啦</button>
     </div>
@@ -670,6 +689,21 @@ document.addEventListener('keydown', function(e){
   if (e.key === 'ArrowUp' || e.key === 'PageUp') go(cur - 1);
 });
 
+/* 弹窗配图（实景 / 史料素材） */
+var POPIMG = {
+  dayeze:  ['img-dayeze.png',   '巨野一带 · 古大野泽位置示意（历史地图）'],
+  huolin:  ['img-huolin.png',   '古画《西狩获麟图》局部 · 孔子见麟而叹'],
+  qilin:   ['img-huolintai.png','巨野麒麟台遗址 · 山东省文物保护单位'],
+  jinshan: ['img-jinshan.jpg',  '金山汉墓群 · 全国重点文物保护单位'],
+  yongfeng:['img-yongfeng.jpg', '永丰塔 · 北宋八角楼阁式砖塔'],
+  baihu:   ['img-baihu.jpg',    '白虎山天池与临水栈道'],
+  mudan:   ['img-mudan.jpg',    '巨野县书画院 · 工笔牡丹画'],
+  huaxiang:['img-mudan.jpg',    '画乡丹青 · 一纸牡丹花开盛世'],
+  guanzi:  ['img-guanzi.jpg',   '巨野罐子汤 · 羊肉粉丝奶白老汤'],
+  zhuangmo:['img-zhuangmo.png', '壮馍 · 皮酥层叠、馅足汁香'],
+  midoumo: ['img-midoumo.png',  '米豆沫 · 咸香浓稠的鲁西南晨味']
+};
+
 /* ================= 弹窗逻辑 ================= */
 var maskEl = document.getElementById('mask');
 function openPop(key){
@@ -678,8 +712,23 @@ function openPop(key){
   document.getElementById('popSeal').textContent = p.seal;
   document.getElementById('popTitle').textContent = p.title;
   document.getElementById('popBody').textContent = p.body;
-  document.getElementById('popFace').innerHTML = qilinSVG(p.expr, 74);
+  document.getElementById('popFace').innerHTML = qilinSVG(p.expr, 60);
   document.getElementById('popFace').dataset.expr = p.expr;
+  /* 配图 */
+  var imgEl = document.getElementById('popImg');
+  var capEl = document.getElementById('popCap');
+  var pic = POPIMG[key];
+  if (pic){
+    imgEl.src = 'assets/' + pic[0];
+    imgEl.alt = p.title;
+    imgEl.style.display = 'block';
+    capEl.textContent = pic[1];
+    capEl.style.display = 'block';
+  } else {
+    imgEl.style.display = 'none';
+    capEl.style.display = 'none';
+  }
+  document.getElementById('popBody').scrollTop = 0;
   maskEl.classList.add('show');
   setExpr(p.expr);
 }
