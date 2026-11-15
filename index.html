@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>麟州雅集 · 巨野 — 国风文旅 H5</title>
+<style>
+  :root{
+    --ink:#2b2b33;
+    --cinnabar:#c0392b;
+    --cinnabar-d:#96281b;
+    --gold:#c9a063;
+    --gold-d:#a87f3f;
+    --paper:#f6efdd;
+    --pine:#2f4b4e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:"STKaiti","KaiTi","STSong","SimSun",serif;
+    background:#1d1a16;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  /* ---------- 手机外壳（桌面端 9:16 画框） ---------- */
+  .stage{
+    position:relative;
+    width:min(100vw, calc(100vh * 9 / 16));
+    height:min(100vh, calc(100vw * 16 / 9));
+    background:#000;
+    overflow:hidden;
+    box-shadow:0 0 0 1px #3a332a, 0 0 60px rgba(201,160,99,.25);
+  }
+  @media (min-width:520px){
+    .stage{border-radius:36px;border:10px solid #26221c;}
+  }
+  /* ---------- 页面容器与翻页 ---------- */
+  .pages{position:absolute;inset:0;transition:transform .65s cubic-bezier(.65,.05,.36,1);}
+  .page{
+    position:absolute;left:0;top:0;width:100%;height:100%;
+    background-size:cover;background-position:center;
+    display:flex;flex-direction:column;
+    visibility:hidden;
+  }
+  .page.active{visibility:visible;}
+  .page::before{ /* 宣纸晕染压暗层，保证文字可读 */
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(20,16,10,.42) 0%, rgba(20,16,10,.06) 30%, rgba(20,16,10,.08) 60%, rgba(20,16,10,.55) 100%);
+    pointer-events:none;
+  }
+  .page > *{position:relative;z-index:2;}
+
+  /* ---------- 国风装饰 ---------- */
+  .cloud{
+    position:absolute;opacity:.5;pointer-events:none;z-index:1;
+    animation:cloudDrift 14s ease-in-out infinite alternate;
+  }
+  @keyframes cloudDrift{from{transform:translateX(-14px);}to{transform:translateX(18px);}}
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 20px 0;
+  }
+  .seal{
+    background:var(--cinnabar);color:#fdf6e3;
+    font-size:12px;letter-spacing:2px;
+    padding:6px 10px;border-radius:4px;
+    writing-mode:vertical-rl;
+    box-shadow:2px 2px 0 rgba(0,0,0,.25);
+    border:1px solid #e8b7a5;
+  }
+  .pageno{
+    color:#f3e7c8;font-size:12px;letter-spacing:3px;opacity:.85;
+    border:1px solid rgba(243,231,200,.4);border-radius:999px;padding:4px 12px;
+    background:rgba(0,0,0,.25);backdrop-filter:blur(2px);
+  }
+  .titlebox{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .vtitle{
+    writing-mode:vertical-rl;
+    font-size:46px;font-weight:700;color:#fdf6e3;letter-spacing:14px;
+    text-shadow:0 2px 12px rgba(0,0,0,.55);
+  }
+  .subtitle{
+    margin-top:14px;color:#f3e2bd;font-size:15px;letter-spacing:6px;
+    text-shadow:0 1px 6px rgba(0,0,0,.6);
+  }
+  .divider{
+    width:180px;height:14px;margin:16px auto 0;opacity:.9;
+  }
+
+  /* ---------- 热点卡片 ---------- */
+  .hotzone{
+    display:flex;flex-direction:column;gap:12px;
+    padding:0 26px 120px;
+  }
+  .hot{
+    position:relative;
+    background:rgba(246,239,221,.92);
+    border:1px solid var(--gold);
+    border-radius:14px;
+    padding:14px 18px;
+    box-shadow:0 6px 18px rgba(0,0,0,.35);
+    display:flex;align-items:center;gap:14px;
+    cursor:pointer;
+    transition:transform .25s, box-shadow .25s;
+    animation:cardIn .7s both;
+  }
+  .hot:nth-child(2){animation-delay:.15s}
+  .hot:nth-child(3){animation-delay:.3s}
+  @keyframes cardIn{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:none;}}
+  .hot:active{transform:scale(.96);}
+  .hot .dot-pulse{
+    position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;
+    background:var(--cinnabar);
+    animation:pulse 1.6s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(192,57,43,.55);}
+    70%{box-shadow:0 0 0 12px rgba(192,57,43,0);}
+    100%{box-shadow:0 0 0 0 rgba(192,57,43,0);}
+  }
+  .hot .ico{
+    width:46px;height:46px;flex:none;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#f0dcb4,#dfc089);
+    border:1px solid var(--gold-d);
+    font-size:24px;
+  }
+  .hot h3{font-size:19px;color:var(--cinnabar-d);letter-spacing:3px;}
+  .hot p{font-size:12.5px;color:#5c5344;margin-top:3px;letter-spacing:1px;line-height:1.5;}
+  .hot .tap{font-size:11px;color:var(--gold-d);margin-left:auto;flex:none;letter-spacing:1px;}
+
+  /* ---------- 按钮 ---------- */
+  .btn{
+    display:inline-block;
+    background:linear-gradient(180deg,#d0503e,var(--cinnabar));
+    color:#fdf6e3;font-size:18px;letter-spacing:6px;font-family:inherit;
+    border:1px solid #e8a98f;border-radius:999px;
+    padding:14px 42px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(150,40,27,.45), inset 0 1px 0 rgba(255,255,255,.25);
+    transition:transform .2s;
+  }
+  .btn:active{transform:scale(.94);}
+  .btn-ghost{
+    background:rgba(0,0,0,.3);color:#f3e2bd;border:1px solid rgba(243,226,189,.6);
+    box-shadow:none;font-size:14px;padding:10px 26px;letter-spacing:4px;
+  }
+
+  /* ---------- 小麒麟吉祥物 ---------- */
+  .mascot-wrap{
+    position:absolute;right:14px;bottom:86px;z-index:30;
+    display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+    pointer-events:none;
+  }
+  .mascot{pointer-events:auto;cursor:pointer;animation:bob 3s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(0,0,0,.35));}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+  .bubble{
+    max-width:170px;
+    background:rgba(246,239,221,.96);
+    border:1.5px solid var(--gold);
+    border-radius:14px 14px 4px 14px;
+    padding:9px 12px;font-size:12.5px;line-height:1.6;color:#4a4033;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+    animation:bubbleIn .5s both;
+    letter-spacing:.5px;
+  }
+  @keyframes bubbleIn{from{opacity:0;transform:translateY(10px) scale(.9);}to{opacity:1;transform:none;}}
+  /* 麒麟眼睛眨动 */
+  .eye{transform-origin:center;animation:blink 4.2s infinite;}
+  @keyframes blink{0%,92%,100%{transform:scaleY(1);}95%,97%{transform:scaleY(.08);}}
+  .tailflame{transform-origin:left center;animation:swish 2.2s ease-in-out infinite alternate;}
+  @keyframes swish{from{transform:rotate(-8deg);}to{transform:rotate(10deg);}}
+  .horn-gem{animation:gemGlow 2.4s ease-in-out infinite;}
+  @keyframes gemGlow{0%,100%{opacity:.75;}50%{opacity:1;}}
+
+  /* 表情切换：data-expr 控制五官组显隐 */
+  [data-expr] .face-part{display:none;}
+  [data-expr="normal"] .expr-normal,
+  [data-expr="happy"]  .expr-happy,
+  [data-expr="wow"]    .expr-wow,
+  [data-expr="eat"]    .expr-eat{display:block;}
+  [data-expr="happy"] .eye-open,
+  [data-expr="eat"] .eye-open{display:none;}
+  [data-expr="happy"] .eye-happy,
+  [data-expr="eat"] .eye-happy{display:block;}
+
+  /* ---------- 弹窗 ---------- */
+  .mask{
+    position:absolute;inset:0;z-index:60;
+    background:rgba(15,12,8,.55);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s;
+  }
+  .mask.show{opacity:1;pointer-events:auto;}
+  .modal{
+    width:84%;max-width:340px;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(201,160,99,.18), transparent 40%),
+      var(--paper);
+    border-radius:18px;
+    border:2px solid var(--gold);
+    box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 0 0 6px rgba(201,160,99,.15);
+    padding:22px 20px 18px;
+    transform:translateY(30px) scale(.92);
+    transition:transform .35s cubic-bezier(.2,1.4,.4,1);
+    text-align:center;
+    position:relative;
+  }
+  .mask.show .modal{transform:none;}
+  .modal::before,.modal::after{ /* 卷轴轴头 */
+    content:"";position:absolute;left:-7px;right:-7px;height:10px;
+    background:linear-gradient(90deg,var(--gold-d),#e8cf9e,var(--gold-d));
+    border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.3);
+  }
+  .modal::before{top:-6px;}
+  .modal::after{bottom:-6px;}
+  .modal-seal{
+    position:absolute;top:-16px;left:50%;transform:translateX(-50%) rotate(-4deg);
+    background:var(--cinnabar);color:#fdf6e3;
+    font-size:13px;letter-spacing:3px;padding:6px 12px;border-radius:5px;
+    border:1px solid #e8b7a5;box-shadow:0 3px 8px rgba(0,0,0,.35);z-index:2;
+  }
+  .modal-face{width:74px;margin:6px auto 4px;display:block;}
+  .modal h3{color:var(--cinnabar-d);font-size:22px;letter-spacing:5px;margin:4px 0 10px;}
+  .modal .body{font-size:13.5px;color:#4a4033;line-height:1.9;text-align:justify;letter-spacing:1px;}
+  .modal .btn{margin-top:16px;font-size:14px;padding:10px 30px;letter-spacing:4px;}
+
+  /* ---------- 导航 ---------- */
+  .dots{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    display:flex;flex-direction:column;gap:10px;z-index:40;
+  }
+  .dots span{
+    width:8px;height:8px;border-radius:50%;
+    background:rgba(246,239,221,.4);border:1px solid rgba(201,160,99,.7);
+    transition:all .3s;cursor:pointer;
+  }
+  .dots span.on{background:var(--cinnabar);height:22px;border-radius:5px;box-shadow:0 0 8px rgba(192,57,43,.8);}
+  .swipe-hint{
+    position:absolute;left:50%;bottom:22px;transform:translateX(-50%);
+    z-index:40;color:#f3e2bd;font-size:12px;letter-spacing:3px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    text-shadow:0 1px 4px rgba(0,0,0,.7);
+    animation:hintFloat 1.8s ease-in-out infinite;
+    pointer-events:none;transition:opacity .4s;
+  }
+  @keyframes hintFloat{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-8px);}}
+
+  /* ---------- 尾页 ---------- */
+  .page6{background:
+      radial-gradient(circle at 50% 18%, rgba(201,160,99,.25), transparent 55%),
+      linear-gradient(170deg,#3a1f16 0%, #572a1c 45%, #2b1a12 100%);}
+  .page6::before{display:none;}
+  .endcard{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    text-align:center;padding:0 30px;
+  }
+  .bigseal{
+    width:96px;height:96px;background:var(--cinnabar);
+    border:2px solid #e8b7a5;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    writing-mode:vertical-rl;color:#fdf6e3;font-size:30px;letter-spacing:8px;font-weight:700;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    animation:sealStamp .8s cubic-bezier(.2,1.6,.4,1) both .3s;
+  }
+  @keyframes sealStamp{from{transform:scale(2.4) rotate(-14deg);opacity:0;}to{transform:none;opacity:1;}}
+  .endcard h2{color:#f6e8c8;font-size:26px;letter-spacing:8px;text-shadow:0 2px 10px rgba(0,0,0,.5);}
+  .endcard p{color:#d9c39a;font-size:13px;letter-spacing:3px;line-height:2;}
+
+  /* 入场通用动效 */
+  .rise{animation:rise .8s both;}
+  @keyframes rise{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:none;}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="pages" id="pages">
+
+    <!-- ===== P1 封面 · 金山 ===== -->
+    <section class="page active" style="background-image:url('assets/bg-jinshan.png')">
+      <svg class="cloud" style="top:12%;left:-10px" width="150" height="60" viewBox="0 0 150 60">
+        <path d="M10 45 Q25 20 50 30 Q60 8 85 18 Q115 5 120 32 Q145 30 140 48 Z" fill="rgba(246,239,221,.7)"/>
+      </svg>
+      <div class="topbar">
+        <div class="seal">麟乡巨野</div>
+        <div class="pageno">壹 · 启幕</div>
+      </div>
+      <div class="titlebox">
+        <div class="vtitle rise">麟州雅集</div>
+        <svg class="divider rise" viewBox="0 0 180 14">
+          <line x1="0" y1="7" x2="72" y2="7" stroke="#e8cf9e" stroke-width="1"/>
+          <rect x="82" y="2" width="10" height="10" transform="rotate(45 87 7)" fill="#c0392b"/>
+          <line x1="102" y1="7" x2="180" y2="7" stroke="#e8cf9e" stroke-width="1"/>
+        </svg>
+        <div class="subtitle rise">大 野 之 泽 · 麒 麟 之 乡</div>
+        <p class="rise" style="margin-top:18px;color:#f3e2bd;font-size:12.5px;letter-spacing:4px;text-shadow:0 1px 4px rgba(0,0,0,.6);">
+          山东 · 菏泽 · 巨野
+        </p>
+        <button class="btn rise" style="margin-top:34px" onclick="go(1)">开启麟乡之旅</button>
+      </div>
+      <div style="height:70px"></div>
+    </section>
+
+    <!-- ===== P2 麟乡溯源 ===== -->
+    <section class="page" style="background-image:url('assets/bg-qilin.png')">
+      <div class="topbar">
+        <div class="seal">麟乡溯源</div>
+        <div class="pageno">贰 · 溯源</div>
+      </div>
+      <div class="titlebox" style="flex:none;padding:26px 20px 8px;">
+        <div style="font-size:30px;color:#fdf6e3;letter-spacing:10px;text-shadow:0 2px 10px rgba(0,0,0,.55);">麟 乡 溯 源</div>
+        <div class="subtitle" style="letter-spacing:4px;">千年古泽 · 因麟而名</div>
+      </div>
+      <div class="hotzone">
+        <div class="hot" onclick="openPop('dayeze')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🌊</div>
+          <div><h3>大野泽</h3><p>上古九泽之一，巨野因泽得名</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('huolin')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🦌</div>
+          <div><h3>西狩获麟</h3><p>孔子绝笔《春秋》的千年一叹</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('qilin')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🏮</div>
+          <div><h3>麒麟之乡</h3><p>获麟台犹在，祥瑞传千年</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== P3 山水胜景 ===== -->
+    <section class="page" style="background-image:url('assets/bg-pagoda.png')">
+      <div class="topbar">
+        <div class="seal">山水胜景</div>
+        <div class="pageno">叁 · 揽胜</div>
+      </div>
+      <div class="titlebox" style="flex:none;padding:26px 20px 8px;">
+        <div style="font-size:30px;color:#fdf6e3;letter-spacing:10px;text-shadow:0 2px 10px rgba(0,0,0,.55);">山 水 胜 景</div>
+        <div class="subtitle" style="letter-spacing:4px;">金山耸立 · 古塔凌云</div>
+      </div>
+      <div class="hotzone">
+        <div class="hot" onclick="openPop('jinshan')">
+          <span class="dot-pulse"></span>
+          <div class="ico">⛰️</div>
+          <div><h3>金山景区</h3><p>「天下之中第一山」与秦王避暑洞</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('yongfeng')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🗼</div>
+          <div><h3>永丰塔</h3><p>北宋古塔，全国重点文物保护单位</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('baihu')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🐯</div>
+          <div><h3>白虎山</h3><p>山石如虎，古寨遗韵映湖光</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== P4 文脉画乡 ===== -->
+    <section class="page" style="background-image:url('assets/bg-peony.png')">
+      <div class="topbar">
+        <div class="seal">文脉画乡</div>
+        <div class="pageno">肆 · 问艺</div>
+      </div>
+      <div class="titlebox" style="flex:none;padding:26px 20px 8px;">
+        <div style="font-size:30px;color:#8c2f22;letter-spacing:10px;text-shadow:0 1px 4px rgba(246,239,221,.9);">文 脉 画 乡</div>
+        <div class="subtitle" style="color:#7a4a28;letter-spacing:4px;text-shadow:none;">家家画室 · 户户画工</div>
+      </div>
+      <div class="hotzone">
+        <div class="hot" onclick="openPop('mudan')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🌺</div>
+          <div><h3>工笔牡丹</h3><p>一纸丹青，花开盛世惊四座</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('huaxiang')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🖌️</div>
+          <div><h3>农民绘画之乡</h3><p>锄头换笔头，庄稼汉画出国礼</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('feiyi')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🎭</div>
+          <div><h3>非遗民俗</h3><p>麒麟传说、鼓吹乐，乡音绕梁</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== P5 麟城风味 ===== -->
+    <section class="page" style="background-image:url('assets/bg-food.png')">
+      <div class="topbar">
+        <div class="seal">麟城风味</div>
+        <div class="pageno">伍 · 寻味</div>
+      </div>
+      <div class="titlebox" style="flex:none;padding:26px 20px 8px;">
+        <div style="font-size:30px;color:#fdf6e3;letter-spacing:10px;text-shadow:0 2px 10px rgba(0,0,0,.55);">麟 城 风 味</div>
+        <div class="subtitle" style="letter-spacing:4px;">一罐老汤 · 暖胃暖心</div>
+      </div>
+      <div class="hotzone">
+        <div class="hot" onclick="openPop('guanzi')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🍲</div>
+          <div><h3>罐子汤</h3><p>陶罐慢煨羊骨汤，汤色奶白</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('zhuangmo')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🫓</div>
+          <div><h3>壮馍</h3><p>鏊子烙出千层香，外酥内软</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+        <div class="hot" onclick="openPop('midoumo')">
+          <span class="dot-pulse"></span>
+          <div class="ico">🥣</div>
+          <div><h3>米豆沫</h3><p>鲁西南清晨的第一碗咸香</p></div>
+          <span class="tap">点我 ›</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== P6 尾页 ===== -->
+    <section class="page page6">
+      <svg class="cloud" style="top:8%;right:-20px" width="170" height="66" viewBox="0 0 150 60">
+        <path d="M10 45 Q25 20 50 30 Q60 8 85 18 Q115 5 120 32 Q145 30 140 48 Z" fill="rgba(201,160,99,.35)"/>
+      </svg>
+      <svg class="cloud" style="top:60%;left:-30px" width="150" height="60" viewBox="0 0 150 60">
+        <path d="M10 45 Q25 20 50 30 Q60 8 85 18 Q115 5 120 32 Q145 30 140 48 Z" fill="rgba(201,160,99,.28)"/>
+      </svg>
+      <div class="topbar">
+        <div class="seal">邀君同游</div>
+        <div class="pageno">陆 · 雅集</div>
+      </div>
+      <div class="endcard">
+        <div class="bigseal">麟乡巨野</div>
+        <h2>邀君同游</h2>
+        <p>大野烟波依旧在，麒麟踏瑞入画来。<br>菏泽巨野，恭候君至。</p>
+        <button class="btn" onclick="openPop('share')">分享雅集</button>
+        <button class="btn btn-ghost" onclick="go(0)">重游一遍</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 小麒麟吉祥物 -->
+  <div class="mascot-wrap">
+    <div class="bubble" id="bubble">欢迎来到麟乡巨野！我是麟麟，点下方按钮出发吧～</div>
+    <div class="mascot" id="mascot" data-expr="happy" onclick="poke()"></div>
+  </div>
+
+  <!-- 弹窗 -->
+  <div class="mask" id="mask" onclick="if(event.target===this)closePop()">
+    <div class="modal">
+      <div class="modal-seal" id="popSeal">麟麟说</div>
+      <div class="modal-face" id="popFace"></div>
+      <h3 id="popTitle"></h3>
+      <div class="body" id="popBody"></div>
+      <button class="btn" onclick="closePop()">知道啦</button>
+    </div>
+  </div>
+
+  <!-- 导航圆点 -->
+  <div class="dots" id="dots"></div>
+
+  <!-- 滑动提示 -->
+  <div class="swipe-hint" id="hint">
+    <svg width="18" height="10" viewBox="0 0 18 10"><path d="M1 9 L9 1 L17 9" fill="none" stroke="#f3e2bd" stroke-width="2" stroke-linecap="round"/></svg>
+    上滑翻页
+  </div>
+</div>
+
+<script>
+/* ================= 小麒麟 SVG（拟人动卡通） ================= */
+function qilinSVG(expr, size){
+  size = size || 96;
+  return '' +
+  '<svg width="'+size+'" height="'+size+'" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' +
+    /* 火焰尾 */
+    '<g class="tailflame">' +
+      '<path d="M96 78 Q112 70 110 54 Q116 66 110 76 Q118 72 118 84 Q112 96 98 92 Z" fill="#c0392b"/>' +
+      '<path d="M98 80 Q108 74 106 64 Q111 72 106 80 Q111 78 110 86 Q104 92 98 88 Z" fill="#e8912d"/>' +
+    '</g>' +
+    /* 身体 */
+    '<ellipse cx="66" cy="86" rx="30" ry="22" fill="#e8b64c"/>' +
+    '<ellipse cx="62" cy="92" rx="18" ry="13" fill="#f7e6bd"/>' +
+    /* 小腿 */
+    '<rect x="42" y="98" width="10" height="14" rx="5" fill="#e8b64c"/>' +
+    '<rect x="78" y="98" width="10" height="14" rx="5" fill="#e8b64c"/>' +
+    '<rect x="42" y="106" width="10" height="6" rx="3" fill="#8c5a2b"/>' +
+    '<rect x="78" y="106" width="10" height="6" rx="3" fill="#8c5a2b"/>' +
+    /* 鬃毛（头后卷毛） */
+    '<g fill="#c0392b">' +
+      '<circle cx="24" cy="34" r="10"/><circle cx="14" cy="48" r="9"/>' +
+      '<circle cx="14" cy="64" r="9"/><circle cx="58" cy="20" r="9"/>' +
+    '</g>' +
+    '<g fill="#e8912d">' +
+      '<circle cx="26" cy="36" r="5"/><circle cx="17" cy="49" r="4.5"/>' +
+      '<circle cx="17" cy="63" r="4.5"/><circle cx="57" cy="22" r="4.5"/>' +
+    '</g>' +
+    /* 头 */
+    '<circle cx="42" cy="52" r="28" fill="#e8b64c"/>' +
+    /* 耳朵 */
+    '<path d="M22 34 Q14 22 22 16 Q30 20 28 32 Z" fill="#e8b64c"/>' +
+    '<path d="M60 30 Q66 16 74 18 Q76 28 66 34 Z" fill="#e8b64c"/>' +
+    '<path d="M23 30 Q19 23 23 20 Q27 23 26 30 Z" fill="#f7e6bd"/>' +
+    /* 独角 */
+    '<path d="M44 26 L50 4 L58 24 Z" fill="#c9a063"/>' +
+    '<path d="M47 20 L54 19 M48 15 L53 14 M49 10 L52 9.5" stroke="#8c5a2b" stroke-width="1.4" fill="none"/>' +
+    '<circle class="horn-gem" cx="51" cy="5" r="3.4" fill="#c0392b"/>' +
+    /* 口鼻 */
+    '<ellipse cx="42" cy="62" rx="16" ry="12" fill="#f7e6bd"/>' +
+    '<circle cx="38" cy="56" r="1.8" fill="#8c5a2b"/><circle cx="46" cy="56" r="1.8" fill="#8c5a2b"/>' +
+    /* 腮红 */
+    '<circle cx="20" cy="60" r="4.5" fill="rgba(192,57,43,.35)"/>' +
+    '<circle cx="64" cy="58" r="4.5" fill="rgba(192,57,43,.35)"/>' +
+    /* 眼睛-睁 */
+    '<g class="face-part expr-normal expr-wow eye-open">' +
+      '<g class="eye"><circle cx="31" cy="46" r="5" fill="#2b2b33"/><circle cx="32.6" cy="44.4" r="1.7" fill="#fff"/></g>' +
+      '<g class="eye"><circle cx="55" cy="45" r="5" fill="#2b2b33"/><circle cx="56.6" cy="43.4" r="1.7" fill="#fff"/></g>' +
+    '</g>' +
+    /* 眼睛-开心眯眯眼 */
+    '<g class="eye-happy" style="display:none">' +
+      '<path d="M25 46 Q31 39 37 46" fill="none" stroke="#2b2b33" stroke-width="2.6" stroke-linecap="round"/>' +
+      '<path d="M49 45 Q55 38 61 45" fill="none" stroke="#2b2b33" stroke-width="2.6" stroke-linecap="round"/>' +
+    '</g>' +
+    /* 嘴巴：普通微笑 */
+    '<g class="face-part expr-normal"><path d="M36 66 Q42 71 48 66" fill="none" stroke="#8c5a2b" stroke-width="2.2" stroke-linecap="round"/></g>' +
+    /* 嘴巴：开心大笑 */
+    '<g class="face-part expr-happy"><path d="M34 64 Q42 76 50 64 Z" fill="#8c3a2b"/><path d="M37 68 Q42 72 47 68" fill="#e8919d"/></g>' +
+    /* 嘴巴：惊讶 O 形 */
+    '<g class="face-part expr-wow"><ellipse cx="42" cy="68" rx="5" ry="6" fill="#8c3a2b"/><ellipse cx="42" cy="70.5" rx="2.6" ry="2.6" fill="#e8919d"/></g>' +
+    /* 嘴巴：馋嘴吐舌 */
+    '<g class="face-part expr-eat"><path d="M34 65 Q42 71 50 65" fill="none" stroke="#8c5a2b" stroke-width="2.2" stroke-linecap="round"/><path d="M42 68 Q46 68 45.5 74 Q43 77 40.5 73 Q40 68 42 68 Z" fill="#e8919d"/></g>' +
+  '</svg>';
+}
+document.getElementById('mascot').innerHTML = qilinSVG('happy', 96);
+
+/* ================= 页面数据 ================= */
+var PAGES = [
+  {bubble:'欢迎来到麟乡巨野！我是麟麟，点「开启麟乡之旅」出发吧～', expr:'happy'},
+  {bubble:'哇！原来孔子在这里见过麒麟！点卡片听我讲～', expr:'wow'},
+  {bubble:'金山、古塔、白虎山……每一处都有故事哦！', expr:'normal'},
+  {bubble:'咱们巨野人，扛起锄头种地，拿起画笔惊天下！', expr:'happy'},
+  {bubble:'咕嘟咕嘟……罐子汤太香啦，麟麟流口水了！', expr:'eat'},
+  {bubble:'旅程结束啦，把麟乡的美分享给更多朋友吧！', expr:'happy'}
+];
+
+/* ================= 弹窗数据 ================= */
+var POPS = {
+  dayeze:{seal:'麟麟说 · 古泽', expr:'normal', title:'大野泽',
+    body:'巨野之名，源于上古大泽「大野泽」。《尚书·禹贡》有载：「大野既潴，东原厎平。」彼时泽水浩渺、烟波千里，名列上古九泽，是先民渔猎耕作的摇篮。沧海桑田，大泽虽渐淤为平陆，「巨野」二字却把千年的水韵留在了地名里。'},
+  huolin:{seal:'麟麟说 · 典故', expr:'wow', title:'西狩获麟',
+    body:'春秋鲁哀公十四年（公元前481年），鲁国贵族在大野泽畔狩猎，意外捕获一只异兽——麒麟。孔子闻讯前往辨认，见仁兽被困，潸然泪下，叹曰：「吾道穷矣！」遂绝笔《春秋》。「西狩获麟」由此成为千年文脉里最著名的一声叹息，巨野也因此被称为「麟州」。'},
+  qilin:{seal:'麟麟说 · 祥瑞', expr:'happy', title:'麒麟之乡',
+    body:'麟之所止，祥瑞之地。巨野至今留存获麟台、麒麟冢等古迹，麒麟传说代代相传，列入非物质文化遗产。县城处处可见麒麟身影：雕塑、灯饰、节庆巡游……我「麟麟」就是从这片祥瑞土里蹦出来的小家伙！'},
+  jinshan:{seal:'麟麟说 · 名山', expr:'normal', title:'金山景区',
+    body:'金山突兀耸立于鲁西南平原，素有「天下之中第一山」之誉。山中有秦王避暑洞，相传秦始皇东巡时曾在此驻跸避暑；洞内凉气袭人，石壁留有古人题刻。每年金山庙会人潮如织，香火绵延千年，是巨野最有烟火气的文化地标。'},
+  yongfeng:{seal:'麟麟说 · 古塔', expr:'wow', title:'永丰塔',
+    body:'永丰塔坐落于巨野县城，始建于北宋，为八角楼阁式砖塔，塔身挺拔、飞檐叠涩，历经千年风雨仍巍然屹立，是全国重点文物保护单位。塔名「永丰」，寄托着古人祈愿五谷丰登、百姓永安的朴素心愿。'},
+  baihu:{seal:'麟麟说 · 秀水', expr:'normal', title:'白虎山',
+    body:'白虎山因山石色白、远观如卧虎而得名。山间有古寨遗韵，山下水域开阔，如今天池碧波、栈道凌虚，成为巨野人休闲登高的好去处。登临山顶远眺，平原沃野尽收眼底，「金山闻钟、白虎望月」并称麟乡胜景。'},
+  mudan:{seal:'麟麟说 · 丹青', expr:'happy', title:'工笔牡丹',
+    body:'巨野工笔牡丹画，以菏泽牡丹为原型，勾线细腻、设色典雅，一朵花要渲染十几遍方能「开」在纸上。这些出自农民画师之手的丹青，曾亮相上合组织青岛峰会、中国国际进口博览会等重大场合，真正从田间地头画进了国家殿堂。'},
+  huaxiang:{seal:'麟麟说 · 画乡', expr:'happy', title:'农民绘画之乡',
+    body:'巨野是「中国农民绘画之乡」「中国工笔画之乡」。这里「家家有画室、户户有画工」，乡亲们农忙扛锄、农闲执笔，全县书画从业人员数以万计，作品远销海内外。一支画笔，画出了好日子，也画出了文化自信。'},
+  feiyi:{seal:'麟麟说 · 民俗', expr:'normal', title:'非遗民俗',
+    body:'巨野的乡音里藏着许多宝贝：麒麟传说口耳相传，鲁西南鼓吹乐一吹一打好不热闹，山东梆子高亢激越唱尽人间悲欢。逢年过节，剪纸、面塑、担经舞轮番登场，老手艺在年轻人手里又玩出了新花样。'},
+  guanzi:{seal:'麟麟说 · 至味', expr:'eat', title:'罐子汤',
+    body:'罐子汤是巨野人刻在骨子里的乡愁。羊骨与羊肉在老汤里翻滚后，盛入粗陶罐子文火慢煨，汤白如奶、醇厚不腻，撒一把芫荽、淋一勺辣椒油，再配上热壮馍——吸溜一口，从胃暖到心。清晨的汤馆里，坐满了端罐「吨吨」的食客。'},
+  zhuangmo:{seal:'麟麟说 · 面食', expr:'eat', title:'壮馍',
+    body:'壮馍，鲁西南面食里的「壮汉」：厚逾寸许的大圆饼，面皮裹着肉馅或素馅，在鏊子上反复翻烙，烙得外皮金黄酥脆、内里层层暄软。一刀下去香气扑鼻，是罐子汤的绝配，也是远行游子行李箱里的常客。'},
+  midoumo:{seal:'麟麟说 · 晨味', expr:'eat', title:'米豆沫',
+    body:'米豆沫是巨野清晨的第一口鲜。小米面细细熬过，加入豆腐丝、粉条、花生与时令菜叶，煮成一锅咸香浓稠的糊糊，胡椒的暖意直窜鼻尖。配一根油条、一个茶蛋，麟乡人的一天就这样热气腾腾地开始了。'},
+  share:{seal:'麟麟说 · 相约', expr:'happy', title:'分享雅集',
+    body:'大野烟波依旧在，麒麟踏瑞入画来。感谢你与麟麟同游麟州巨野——这里有山有水有故事，有画有汤有人情。把这份雅集分享给好友，约上他们，一起去巨野喝一碗热乎的罐子汤吧！'}
+};
+
+/* ================= 翻页逻辑 ================= */
+var cur = 0, total = 6;
+var pagesEl = document.getElementById('pages');
+var dotsEl = document.getElementById('dots');
+var bubbleEl = document.getElementById('bubble');
+var mascotEl = document.getElementById('mascot');
+var hintEl = document.getElementById('hint');
+
+var pages = document.querySelectorAll('.page');
+for (var i = 0; i < total; i++){
+  pages[i].style.transform = 'translateY(' + (i * 100) + '%)';
+  var d = document.createElement('span');
+  d.dataset.i = i;
+  d.onclick = (function(n){ return function(){ go(n); }; })(i);
+  dotsEl.appendChild(d);
+}
+
+function go(n){
+  if (n < 0 || n >= total) return;
+  cur = n;
+  pagesEl.style.transform = 'translateY(' + (-n * 100) + '%)';
+  pages.forEach(function(p, idx){ p.classList.toggle('active', idx === n); });
+  var ds = dotsEl.querySelectorAll('span');
+  ds.forEach(function(d, idx){ d.classList.toggle('on', idx === n); });
+  /* 更新吉祥物台词与表情 */
+  bubbleEl.style.animation = 'none';
+  void bubbleEl.offsetWidth;
+  bubbleEl.textContent = PAGES[n].bubble;
+  bubbleEl.style.animation = '';
+  setExpr(PAGES[n].expr);
+  hintEl.style.opacity = (n === 0) ? '1' : '0';
+}
+function setExpr(e){ mascotEl.dataset.expr = e; }
+
+/* 触摸滑动 */
+var startY = null;
+var stage = document.getElementById('stage');
+stage.addEventListener('touchstart', function(e){
+  if (e.target.closest('.modal') || e.target.closest('.mask')) return;
+  startY = e.touches[0].clientY;
+}, {passive:true});
+stage.addEventListener('touchend', function(e){
+  if (startY === null) return;
+  var dy = e.changedTouches[0].clientY - startY;
+  if (dy < -50) go(cur + 1);
+  else if (dy > 50) go(cur - 1);
+  startY = null;
+}, {passive:true});
+/* 桌面滚轮与键盘 */
+var wheelLock = false;
+stage.addEventListener('wheel', function(e){
+  if (wheelLock) return;
+  wheelLock = true;
+  setTimeout(function(){ wheelLock = false; }, 700);
+  go(cur + (e.deltaY > 0 ? 1 : -1));
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'ArrowDown' || e.key === 'PageDown') go(cur + 1);
+  if (e.key === 'ArrowUp' || e.key === 'PageUp') go(cur - 1);
+});
+
+/* ================= 弹窗逻辑 ================= */
+var maskEl = document.getElementById('mask');
+function openPop(key){
+  var p = POPS[key];
+  if (!p) return;
+  document.getElementById('popSeal').textContent = p.seal;
+  document.getElementById('popTitle').textContent = p.title;
+  document.getElementById('popBody').textContent = p.body;
+  document.getElementById('popFace').innerHTML = qilinSVG(p.expr, 74);
+  document.getElementById('popFace').dataset.expr = p.expr;
+  maskEl.classList.add('show');
+  setExpr(p.expr);
+}
+function closePop(){
+  maskEl.classList.remove('show');
+  setExpr(PAGES[cur].expr);
+}
+
+/* 点按吉祥物彩蛋 */
+var pokeLines = ['哎呀，别戳别戳，痒～', '麟麟是麒麟，不是猫猫！', '再戳我，我就……带你去看金山！', '嘿嘿，喜欢我就分享雅集吧！'];
+var pokeIdx = 0;
+function poke(){
+  bubbleEl.textContent = pokeLines[pokeIdx % pokeLines.length];
+  pokeIdx++;
+  setExpr(pokeIdx % 2 ? 'wow' : 'happy');
+  setTimeout(function(){ setExpr(PAGES[cur].expr); }, 1600);
+}
+
+go(0);
+</script>
+</body>
+</html>
